@@ -1,0 +1,168 @@
+name: "JVET"
+
+
+input "data"
+input_shape{
+  dim 1
+  dim 3072
+  dim 1
+  dim 1
+}
+
+input "pred"
+input_shape{
+  dim 1
+  dim 1024
+  dim 1
+  dim 1
+}
+
+layer {
+  name: "fc1"
+  type: "InnerProduct"
+  bottom: "data"
+  top: "fc1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 3072
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "elu1"
+  type: "ELU"
+  bottom: "fc1"
+  top: "efc1"
+}
+
+layer {
+  name: "fc2"
+  type: "InnerProduct"
+  bottom: "efc1"
+  top: "fc2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 3072
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "elu2"
+  type: "ELU"
+  bottom: "fc2"
+  top: "efc2"
+}
+
+layer {
+  name: "fc3"
+  type: "InnerProduct"
+  bottom: "efc2"
+  top: "fc3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 3072
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "elu3"
+  type: "ELU"
+  bottom: "fc3"
+  top: "efc3"
+}
+
+layer {
+  name: "fc4"
+  type: "InnerProduct"
+  bottom: "efc3"
+  top: "fc4"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 1024
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "elu4"
+  type: "ELU"
+  bottom: "fc4"
+  top: "efc4"
+}
+
+layer {
+  name: "flat"
+  type: "Flatten"
+  bottom: "pred"
+  top: "repred"
+}
+
+layer{
+	name: "res_plus_ori"
+	type: "Eltwise"
+	bottom: "repred"
+	bottom: "efc4"
+	top: "sum"
+	eltwise_param{
+		operation: SUM
+	}
+}
